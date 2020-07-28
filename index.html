@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title></title>
+		<title>临在记录</title>
 		 <meta name ="viewport" content ="initial-scale=1, maximum-scale=3, minimum-scale=1, user-scalable=no">
 		<style type="text/css">
 			#body{
@@ -34,12 +34,12 @@
 				<section id="loss">
 					扣除分数：{{scoreLoss}}
 				</section>
-				<section id="loss">
-					过去数据：{{flowData}}
-				</section>
 				<section>
 					<input type="number" name="" id="" v-model="inputLoss"  style="width: 150px;height: 30px;"/>
 					<button @click="lossChange" style="width: 50px;height: 38px;">确定</button>
+				</section>
+				<section id="loss">
+					过去数据：{{flowData}}
 				</section>
 			</section>
 		</div>
@@ -52,7 +52,7 @@
 		data: {
 			scoreLoss: 0,
 			scoreTime: 0,
-			inputLoss:0
+			inputLoss:null
 		},
 		mounted(){
 			this.getScore()
@@ -94,7 +94,7 @@
 			//扣分事件
 			lossChange(){
 				this.scoreLoss += Number(this.inputLoss)
-				this.inputLoss = 0
+				this.inputLoss = null
 				this.setLocalStorage([...this.flowData,this.getNowItem()])
 			},
 			// 1小时加6分，10分钟无序-1，30分钟无序 - 5；一小时无序 -15
