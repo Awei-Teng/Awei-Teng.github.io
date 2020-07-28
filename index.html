@@ -2,12 +2,14 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>123123123</title>
+		<title></title>
 		<meta name="viewport" content="width=800,user-scalable=no">
 		<style type="text/css">
 			#body{
-				font-size: 24px;
-				line-height: 40px;
+				font-size: 36px;
+				line-height: 60px;
+				width: 300px;
+				margin: 20px auto;
 			}
 			[v-cloak]{
 			    display: none;
@@ -32,9 +34,12 @@
 				<section id="loss">
 					扣除分数：{{scoreLoss}}
 				</section>
+				<section id="loss">
+					过去数据：{{flowData}}
+				</section>
 				<section>
-					<input type="number" name="" id="" v-model="inputLoss"  style="width: 64px;"/>
-					<button @click="lossChange">确定</button>
+					<input type="number" name="" id="" v-model="inputLoss"  style="width: 150px;height: 20px;"/>
+					<button @click="lossChange" style="width: 50px;height: 28px;">确定</button>
 				</section>
 			</section>
 		</div>
