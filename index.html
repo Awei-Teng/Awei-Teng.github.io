@@ -1,144 +1,152 @@
-<!DOCTYPE html><html style=""><head><meta charset=utf-8><title>期融金控风险管理系统</title><link href=./zstatic/css/app.77d2004bd586685feffd9baeddd08e1b.css rel=stylesheet></head><style type=text/css>.el-tabs__item{
-  		height: 20px!important;
-  		line-height: 20px!important;
-  	}
-  		.el-submenu__title{
-				background: none!important;
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<meta name="viewport" content="width=800,user-scalable=no">
+		<style type="text/css">
+			#body{
+				font-size: 24px;
+				line-height: 40px;
 			}
-			.el-tabs__item.is-active {
-			    color: #fbc800!important;
+			[v-cloak]{
+			    display: none;
 			}
-			.el-tabs--border-card {
-			    border: none!important;
-			    /* border: 1px solid #d1dbe5; */
+		</style>
+	</head>
+	<body>
+		<div id="app" v-cloak>
+			<section id="body">
+				<section>
+					{{popItem.date}}
+				</section>
+				<!-- 得分 -->
+				<section id="total">
+					目前得分：<span style="color: red;">{{scoreTime - scoreLoss}}</span>
+				</section>
+				<!-- 时分 -->
+				<section>
+					时间得分：{{scoreTime}}
+				</section>
+				<!-- 扣分 -->
+				<section id="loss">
+					扣除分数：{{scoreLoss}}
+				</section>
+				<section>
+					<input type="number" name="" id="" v-model="inputLoss"  style="width: 64px;"/>
+					<button @click="lossChange">确定</button>
+				</section>
+			</section>
+		</div>
+	</body>
+</html>
+<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.js"></script>
+<script type="text/javascript">
+	new Vue({
+		el: '#app',
+		data: {
+			scoreLoss: 0,
+			scoreTime: 0,
+			inputLoss:0
+		},
+		mounted(){
+			this.getScore()
+			setInterval(()=>{
+				const hours = new Date().getHours()
+				//半夜可看昨天的资料，但不更新了
+				//23点以后才加分，8点才第一次加分
+				if(hours <= 23 && hours > 7){
+					this.syncStorage()
+				}
+			},1000)
+		},
+		computed:{
+			flowData(){
+				let _flowData = JSON.parse(window.localStorage.getItem('flowData'))
+				if(_flowData){
+					_flowData.pop()
+					return _flowData
+				}
+			},
+			popItem(){
+				let _flowData = JSON.parse(window.localStorage.getItem('flowData'))
+				if(_flowData){
+					return _flowData.pop()
+				}
+			},
+			isToday(){
+				return this.popItem ? this.popItem.date ==this.dateFormat('YYYY-mm-dd',new Date()) :true
 			}
-			.th{
-				background: none!important;
+		},
+		methods: {
+			syncStorage(){
+				if(this.isToday){
+					this.setLocalStorage([...this.flowData,this.getNowItem()])
+				}else{
+					this.setLocalStorage([...this.flowData,this.popItem,this.getNowItem()])
+				}
+			},
+			//扣分事件
+			lossChange(){
+				this.scoreLoss += Number(this.inputLoss)
+				this.inputLoss = 0
+				this.setLocalStorage([...this.flowData,this.getNowItem()])
+			},
+			// 1小时加6分，10分钟无序-1，30分钟无序 - 5；一小时无序 -15
+			getScore() {
+				if(this.flowData){
+					//有今天数据
+					if(this.isToday){
+						this.scoreTime = this.popItem.scoreTime
+						this.scoreLoss = this.popItem.scoreLoss
+					}else{
+						this.setLocalStorage([...this.flowData,this.popItem,this.getNowItem()])
+					}
+				}else{
+					//第一次访问初始化
+					this.setLocalStorage([this.getNowItem()])
+				}
+			},
+			//获取新的临在对象
+			getNowItem(){
+				const hours = new Date().getHours()
+				//7点第一次执行，重置扣分
+				if(!this.isToday){
+					this.scoreLoss = 0
+				}
+				this.scoreTime = (hours - 7) * 6
+				const item = {
+					date:this.dateFormat('YYYY-mm-dd',new Date()),
+					scoreTime:this.scoreTime,
+					scoreLoss:this.scoreLoss
+				}
+				return item;
+			},
+			//设置localStorage
+			setLocalStorage(data){
+				localStorage.setItem('flowData',JSON.stringify(data))
+			},
+			//YYYY-mm-dd HH:MM表示2019-06-06 19:45
+			dateFormat(fmt, date) {
+			    let ret;
+			    const opt = {
+			        "Y+": date.getFullYear().toString(),        // 年
+			        "m+": (date.getMonth() + 1).toString(),     // 月
+			        "d+": date.getDate().toString(),            // 日
+			        "H+": date.getHours().toString(),           // 时
+			        "M+": date.getMinutes().toString(),         // 分
+			        "S+": date.getSeconds().toString()          // 秒
+			        // 有其他格式化字符需求可以继续添加，必须转化成字符串
+			    };
+			    for (let k in opt) {
+			        ret = new RegExp("(" + k + ")").exec(fmt);
+			        if (ret) {
+			            fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+			        };
+			    };
+			    return fmt;
 			}
-	.el-tabs--border-card>.el-tabs__header .el-tabs__item.is-active {
-	    /*background: none!important;*/
-	   background: #333!important;
-	    /*border: none!important;*/
-	}
-	.el-message__group{
-		background: none!important;
-	}
-	input{
-		background: rgb(28,28,28);
-		border: 1px solid #666!important;
-		color: #000!important;
-	}
-	button{
-		color: #fff!important;
-		background: #b49004!important;
-	}
-	.cell{
-		background: none!important;
-	}
-	.el-dialog__title{
-		color: #fff!important;
-	}
-	.grid-content,.el-dialog__footer span{
-		color: #fff!important
-	}
-	.grid-content span{
-		color: #fff!important
-	}
-	.el-dialog__headerbtn{
-		background: none!important;
-	}
-	.width{
-		background: #fff;
-	}
-	.el-select-dropdown__item.hover, .el-select-dropdown__item:hover {
-	    background-color: #4574bc!important;
-	}
-	.el-tabs--border-card>.el-tabs__header .el-tabs__item {
-		transition:none!important;
-		border-left: 1px solid #d9d9d9!important;
-		border-right: none!important;
-	}
-	.el-notification__group,.el-notification__group div,h2{
-		background: none;
-	}
-	.el-tabs__nav{
-		height: 34px;
-		border-bottom: 1px solid rgb(28,28,28);
-		text-align: left;
-		width: 100%;
-		padding-top: 8px;
-	}
-	/*.el-tabs__nav .el-tabs__item:nth-child(3){
-		border:none!important;
-		border-right: 1px solid #d5cdcd!important;
-	}
-	.el-tabs__nav .el-tabs__item:nth-child(1){
-		border:none!important;
-		border-left: 1px solid #d5cdcd!important;
-	}*/</style><script type=text/javascript>console.log(document.documentElement.clientWidth,'wid')
-	function init() {
-		if(document.documentElement.clientWidth<=1220){
-			document.getElementsByTagName('html')[0].style.width = "1220px"
-		}else{
-			document.getElementsByTagName('html')[0].style.width = "auto"
+
 		}
-	}
-	init();
-	window.addEventListener('orientationchange',init);
-	window.addEventListener('resize',init);
-  
-  
-  
-//   var http='http://192.168.0.123:8080/'
-//var http='http://39.108.138.25/boot_futures/'
-var http='http://futures.srongzb.com/boot_futures/'
-   var sessionKey=sessionStorage.getItem('objOne');
-		//var sessionKey='9d110928e8c8697a3627b255d823449c';	
-		var userName=sessionStorage.getItem('userName');
-		
-       Date.prototype.format = function(format) {
-       var date = {
-              "M+": this.getMonth() + 1,
-              "d+": this.getDate(),
-              "h+": this.getHours(),
-              "m+": this.getMinutes(),
-              "s+": this.getSeconds(),
-              "q+": Math.floor((this.getMonth() + 3) / 3),
-              "S+": this.getMilliseconds()
-       };
-       if (/(y+)/i.test(format)){
-              format = format.replace(RegExp.$1, (this.getFullYear() + '').substr(4 - RegExp.$1.length));
-       }
-       for (var k in date) {
-              if (new RegExp("(" + k + ")").test(format)) {
-                     format = format.replace(RegExp.$1, RegExp.$1.length == 1
-                            ? date[k] : ("00" + date[k]).substr(("" + date[k]).length));
-              }
-       }
-       return format;
-      }
-      var ajax = function(info){
-        if(window.XMLHttpRequest){
-          var xhr = new XMLHttpRequest(); 
-        }else{
-          var xhr = new ActiveXObject("Microsoft.XMLHTTP");
-        }
-        var url = info.url;
-        var type = info.type||"GET";
-        var data = info.data||"";
-        
-        if(type=="GET"){
-          xhr.open("GET",url+"?"+data+"&t="+new Date().getTime(),true);
-          xhr.send();
-        }else{
-          xhr.open("POST",url,true);
-          xhr.setRequestHeader("Content-Type","application/json; charset=utf-8")  ;
-          xhr.send(data);
-        }
-        
-        xhr.onload = function(){
-          if(info.success){
-            info.success(xhr.responseText);
-          }
-        }
-      }</script><body><div id=app></div><script type=text/javascript src=./zstatic/js/manifest.039018a723862aac6512.js></script><script type=text/javascript src=./zstatic/js/vendor.f1edfb365a83c79ce552.js></script><script type=text/javascript src=./zstatic/js/app.a46e1c2ab6c0f88fc19c.js></script></body></html>
+	})
+</script>
