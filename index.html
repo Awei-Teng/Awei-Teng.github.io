@@ -35,8 +35,12 @@
 					扣除分数：{{scoreLoss}}
 				</section>
 				<section>
-					<input type="number" name="" id="" v-model="inputLoss"  style="width: 150px;height: 30px;"/>
-					<button @click="lossChange" style="width: 50px;height: 38px;">确定</button>
+					<button @click="countChange(1)" style="width: 100px;height: 38px;">加一</button>
+					<button @click="countChange(-1)" style="width: 100px;height: 38px;">减一</button>
+				</section>
+				<section>
+					<input type="number" name="" id="" v-model="inputLoss"  style="width: 112px;height: 30px;"/>
+					<button @click="lossChange" style="width: 80px;height: 38px;">确定</button>
 				</section>
 				<section id="loss">
 					过去数据：{{flowData}}
@@ -84,12 +88,17 @@
 			}
 		},
 		methods: {
+			
 			syncStorage(){
 				if(this.isToday){
 					this.setLocalStorage([...this.flowData,this.getNowItem()])
 				}else{
 					this.setLocalStorage([...this.flowData,this.popItem,this.getNowItem()])
 				}
+			},
+			countChange(count){
+				this.inputLoss = count
+				this.lossChange()
 			},
 			//扣分事件
 			lossChange(){
