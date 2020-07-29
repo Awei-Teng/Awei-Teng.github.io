@@ -8,7 +8,7 @@
 			#body{
 				font-size: 36px;
 				line-height: 60px;
-				width: 240px;
+				width: 250px;
 				margin: 20px auto;
 			}
 			[v-cloak]{
@@ -20,30 +20,32 @@
 		<div id="app" v-cloak>
 			<section id="body">
 				<section>
-					{{popItem?popItem.date:'---'}}
+					{{currentDate}}
 				</section>
 				<!-- 得分 -->
 				<section id="total">
-					目前得分：<span style="color: red;">{{scoreTime - scoreLoss}}</span>
-				</section>
-				<!-- 时分 -->
-				<section>
-					时间得分：{{scoreTime}}
+					目前得分：<span style="color: red;">{{100 - scoreLoss}}</span>
 				</section>
 				<!-- 扣分 -->
 				<section id="loss">
 					扣除分数：{{scoreLoss}}
 				</section>
 				<section>
-					<button @click="countChange(1)" style="width: 100px;height: 38px;">加一</button>
-					<button @click="countChange(-1)" style="width: 100px;height: 38px;">减一</button>
+					<button @click="countChange(1)" style="width: 100px;height: 38px;">减一</button>
+					<button @click="countChange(-1)" style="width: 100px;height: 38px;">加一</button>
 				</section>
 				<section>
 					<input type="number" name="" id="" v-model="inputLoss"  style="width: 112px;height: 30px;"/>
 					<button @click="lossChange" style="width: 80px;height: 38px;">确定</button>
 				</section>
-				<section id="loss">
-					过去数据：{{flowData}}
+				<!-- 过去数据 -->
+				<section id="loss" style="font-size: 10px;line-height: 14px;margin-top: 20px;">
+					过去数据：
+					<ul>
+						<li v-for="(item,index) in flowData" :key="index">
+							date: {{item.date}}, scoreLoss: {{item.scoreLoss}}
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -55,18 +57,13 @@
 		el: '#app',
 		data: {
 			scoreLoss: 0,
-			scoreTime: 0,
-			inputLoss:null
+			inputLoss:null,
+			currentDate:'---'
 		},
 		mounted(){
 			this.getScore()
 			setInterval(()=>{
-				const hours = new Date().getHours()
-				//半夜可看昨天的资料，但不更新了
-				//23点以后才加分，8点才第一次加分
-				if(hours <= 23 && hours > 7){
-					this.syncStorage()
-				}
+				this.syncStorage()
 			},1000)
 		},
 		computed:{
@@ -91,7 +88,7 @@
 			
 			syncStorage(){
 				if(this.isToday){
-					this.setLocalStorage([...this.flowData,this.getNowItem()])
+					// this.setLocalStorage([...this.flowData,this.getNowItem()])
 				}else{
 					this.setLocalStorage([...this.flowData,this.popItem,this.getNowItem()])
 				}
@@ -111,7 +108,6 @@
 				if(this.flowData){
 					//有今天数据
 					if(this.isToday){
-						this.scoreTime = this.popItem.scoreTime
 						this.scoreLoss = this.popItem.scoreLoss
 					}else{
 						this.setLocalStorage([...this.flowData,this.popItem,this.getNowItem()])
@@ -120,18 +116,17 @@
 					//第一次访问初始化
 					this.setLocalStorage([this.getNowItem()])
 				}
+					console.log(JSON.parse(window.localStorage.getItem('flowData')).pop())
+					this.currentDate = JSON.parse(window.localStorage.getItem('flowData')).pop().date
 			},
 			//获取新的临在对象
 			getNowItem(){
-				const hours = new Date().getHours()
 				//7点第一次执行，重置扣分
 				if(!this.isToday){
 					this.scoreLoss = 0
 				}
-				this.scoreTime = (hours - 7) * 6
 				const item = {
 					date:this.dateFormat('YYYY-mm-dd',new Date()),
-					scoreTime:this.scoreTime,
 					scoreLoss:this.scoreLoss
 				}
 				return item;
