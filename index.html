@@ -19,12 +19,12 @@
 	<body>
 		<div id="app" v-cloak>
 			<section id="body">
-				<section>
+				<section style="font-size: 18px;text-align: center;">
 					{{currentDate}}
 				</section>
 				<!-- 得分 -->
 				<section id="total">
-					目前得分：<span style="color: red;">{{100 - scoreLoss}}</span>
+					总分：<span style="color: red;">{{60 - scoreLoss + targetGet}}</span>
 				</section>
 				<!-- 扣分 -->
 				<section id="loss">
@@ -32,18 +32,25 @@
 				</section>
 				<section>
 					<button @click="countChange(1)" style="width: 100px;height: 38px;">减一</button>
-					<button @click="countChange(-1)" style="width: 100px;height: 38px;">加一</button>
+					<button @click="countChange(-1)" style="width: 50px;height: 38px;">加一</button>
 				</section>
 				<section>
+					目标分数：{{targetGet}}
+				</section>
+				<section>
+					<button @click="countChange2(1)" style="width: 100px;height: 38px;">加一</button>
+					<button @click="countChange2(-1)" style="width: 50px;height: 38px;">减一</button>
+				</section>
+				<!-- <section>
 					<input type="number" name="" id="" v-model="inputLoss"  style="width: 112px;height: 30px;"/>
 					<button @click="lossChange" style="width: 80px;height: 38px;">确定</button>
-				</section>
+				</section> -->
 				<!-- 过去数据 -->
 				<section id="loss" style="font-size: 10px;line-height: 14px;margin-top: 20px;">
 					过去数据：
 					<ul>
 						<li v-for="(item,index) in flowData" :key="index">
-							date: {{item.date}}, scoreLoss: {{item.scoreLoss}}
+							date: {{item.date}}, scoreLoss: {{item.scoreLoss}}, targetGet: {{item.targetGet}}
 						</li>
 					</ul>
 				</section>
@@ -57,6 +64,7 @@
 		el: '#app',
 		data: {
 			scoreLoss: 0,
+			targetGet: 0,
 			inputLoss:null,
 			currentDate:'---'
 		},
@@ -93,9 +101,19 @@
 					this.setLocalStorage([...this.flowData,this.popItem,this.getNowItem()])
 				}
 			},
+			countChange2(count){
+				this.targetGet += count
+				this.setLocalStorage([...this.flowData,this.getNowItem()])
+			},
 			countChange(count){
 				this.inputLoss = count
 				this.lossChange()
+			},
+			//目标事件
+			lossChange2(){
+				this.scoreLoss += Number(this.inputLoss)
+				this.inputLoss = null
+				this.setLocalStorage([...this.flowData,this.getNowItem()])
 			},
 			//扣分事件
 			lossChange(){
@@ -109,6 +127,7 @@
 					//有今天数据
 					if(this.isToday){
 						this.scoreLoss = this.popItem.scoreLoss
+						this.targetGet = this.popItem.targetGet || 0
 					}else{
 						this.setLocalStorage([...this.flowData,this.popItem,this.getNowItem()])
 					}
@@ -124,10 +143,12 @@
 				//7点第一次执行，重置扣分
 				if(!this.isToday){
 					this.scoreLoss = 0
+					this.targetGet = 0
 				}
 				const item = {
 					date:this.dateFormat('YYYY-mm-dd',new Date()),
-					scoreLoss:this.scoreLoss
+					scoreLoss:this.scoreLoss,
+					targetGet:this.targetGet
 				}
 				return item;
 			},
