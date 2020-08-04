@@ -6,16 +6,39 @@
 		 <meta name ="viewport" content ="initial-scale=1, maximum-scale=3, minimum-scale=1, user-scalable=no">
 		<style type="text/css">
 			#body{
-				font-size: 36px;
-				line-height: 60px;
-				width: 250px;
+				font-size: 16px;
+				line-height: 40px;
+				width: 200px;
 				margin: 20px auto;
 			}
 			[v-cloak]{
 			    display: none;
 			}
+			.button-style{
+				width: 100px;
+				height: 38px;
+				margin-right:20px;
+			}
+			.targetFulfill{
+				color:#3286ce;
+			}
+			.oldData li{
+				padding:2px 0;
+				list-style: none;
+			}
+			.oldData li span{
+					display:inline-block;
+					width:40px;
+					text-align:center;
+			}
+			.oldData li span:nth-child(1){
+					display:inline-block;
+					width:70px;
+			}
 		</style>
-	</head>
+		<script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.8.0/echarts.min.js"></script>
+		<script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.3.4/vconsole.min.js"></script>
+	</head>		
 	<body>
 		<div id="app" v-cloak>
 			<section id="body">
@@ -24,37 +47,66 @@
 				</section>
 				<!-- 得分 -->
 				<section id="total">
-					总分：<span style="color: red;">{{60 - scoreLoss + targetGet}}</span>
+					总分：<span style="color: red;">{{getTotal}}</span>
 				</section>
 				<!-- 扣分 -->
 				<section id="loss">
 					扣除分数：{{scoreLoss}}
 				</section>
 				<section>
-					<button @click="countChange(1)" style="width: 100px;height: 38px;">减一</button>
+					<button @click="countChange(1)" class="button-style">减一</button>
 					<button @click="countChange(-1)" style="width: 50px;height: 38px;">加一</button>
 				</section>
 				<section>
-					目标得数：{{targetGet}}
+					行为目标：{{targetGet}}
 				</section>
 				<section>
-					<button @click="countChange2(1)" style="width: 100px;height: 38px;">加一</button>
+					<button @click="countChange1(1)" class="button-style">加一</button>
+					<button @click="countChange1(-1)" style="width: 50px;height: 38px;">减一</button>
+				</section>
+				<section>
+					思考目标：{{targetGet2}}
+				</section>
+				<section>
+					<button @click="countChange2(1)" class="button-style">加一</button>
 					<button @click="countChange2(-1)" style="width: 50px;height: 38px;">减一</button>
 				</section>
+				
 				<!-- <section>
 					<input type="number" name="" id="" v-model="inputLoss"  style="width: 112px;height: 30px;"/>
 					<button @click="lossChange" style="width: 80px;height: 38px;">确定</button>
 				</section> -->
 				<!-- 过去数据 -->
-				<section id="loss" style="font-size: 10px;line-height: 14px;margin-top: 20px;">
-					过去数据：
-					<ul>
-						<li v-for="(item,index) in flowData" :key="index">
-							date: {{item.date}}, scoreLoss: {{item.scoreLoss}}, targetGet: {{item.targetGet}}
-						</li>
-					</ul>
-				</section>
+				
 			</section>
+			<section style="margin:20px 0 10px 10px;">
+				常驻目标：{{targetGet2}}
+			</section>
+			<section style="margin-bottom:20px;">
+				<button v-for="(item,index) in targetList" :key="index" @click="targetIdListChange(item.id)" 
+				style="margin:0 10px 5px 0;" :class="[targetIdList.indexOf(item.id)>-1?'targetFulfill':'']">{{item.label}}</button>
+			</section>
+
+			<section id="loss" style="font-size: 10px;line-height: 14px;margin-top: 20px;">
+				过去数据：
+				<ul class="oldData">
+					<li>
+						<span>日期</span>
+						<span>总分</span>
+						<span>临在</span>
+						<span>行为</span>
+						<span>思考</span>
+					</li>
+					<li v-for="(item,index) in flowData" :key="index">
+					<span>{{item.date}}</span>
+						<span>{{60 - item.scoreLoss + item.targetGet +item.targetGet2}}</span>
+						<span>{{item.scoreLoss}}</span>
+						<span>{{item.targetGet}}</span>
+						<span>{{item.targetGet2}}</span>
+					</li>
+				</ul>
+			</section>
+			<div id="main" style="width: 100%;height:400px;"></div>
 		</div>
 	</body>
 </html>
@@ -65,16 +117,63 @@
 		data: {
 			scoreLoss: 0,
 			targetGet: 0,
+			targetGet2: 0,
 			inputLoss:null,
-			currentDate:'---'
+			currentDate:'---',
+			targetIdList:[],
+			targetList:[{
+				id:1,
+				label:"早睡"
+			},{
+				id:2,
+				label:"早起"
+			},{
+				id:3,
+				label:"锻炼"
+			},{
+				id:4,
+				label:"练声"
+			},{
+				id:5,
+				label:"学习技术"
+			},{
+				id:6,
+				label:"心理学"
+			},{
+				id:7,
+				label:"听书读书"
+			},{
+				id:8,
+				label:"交际"
+			}]
 		},
 		mounted(){
+				this.setLocalStorage([{date: "2020-08-04",
+			scoreLoss: 1,
+			targetGet: 1,
+			targetGet2: 1,
+			targetIdList: [5, 8, 3]},{date: "2020-08-04",
+			scoreLoss: 1,
+			targetGet: 1,
+			targetGet2: 1,
+			targetIdList: [5, 8, 3]},{date: "2020-08-04",
+			scoreLoss: 1,
+			targetGet: 1,
+			targetGet2: 1,
+			targetIdList: [5, 8, 3]}])
+
+
 			this.getScore()
 			setInterval(()=>{
 				this.syncStorage()
 			},1000)
+
+
+			 var vConsole = new VConsole(); //手机控制台
+
 		},
 		computed:{
+			
 			flowData(){
 				let _flowData = JSON.parse(window.localStorage.getItem('flowData'))
 				if(_flowData){
@@ -90,10 +189,30 @@
 			},
 			isToday(){
 				return this.popItem ? this.popItem.date ==this.dateFormat('YYYY-mm-dd',new Date()) :true
+			},
+			getTotal(){
+				return 60 - this.scoreLoss + this.targetGet +this.targetGet2;
 			}
 		},
 		methods: {
-			
+			getTotalValue(item){
+				item.scoreLoss = item.scoreLoss || 0
+				item.targetGet = item.targetGet || 0
+				item.targetGet2 = item.targetGet2 || 0
+
+				return 60 - item.scoreLoss + item.targetGet +item.targetGet2;
+			},
+			//点击常跓目标
+			targetIdListChange(id){
+				const ind = this.targetIdList.indexOf(id)
+					if(ind >-1){
+						this.targetIdList.splice(ind,1)
+					}else{
+						this.targetIdList.push(id)
+					}
+				this.setLocalStorage([...this.flowData,this.getNowItem()])
+			},
+			//同步
 			syncStorage(){
 				if(this.isToday){
 					// this.setLocalStorage([...this.flowData,this.getNowItem()])
@@ -101,10 +220,17 @@
 					this.setLocalStorage([...this.flowData,this.popItem,this.getNowItem()])
 				}
 			},
+			//思考目标
 			countChange2(count){
+				this.targetGet2 += count
+				this.setLocalStorage([...this.flowData,this.getNowItem()])
+			},
+			//行为目标
+			countChange1(count){
 				this.targetGet += count
 				this.setLocalStorage([...this.flowData,this.getNowItem()])
 			},
+			//临在扣除
 			countChange(count){
 				this.inputLoss = count
 				this.lossChange()
@@ -128,6 +254,8 @@
 					if(this.isToday){
 						this.scoreLoss = this.popItem.scoreLoss
 						this.targetGet = this.popItem.targetGet || 0
+						this.targetGet2 = this.popItem.targetGet2 || 0
+						this.targetIdList = this.popItem.targetIdList || []
 					}else{
 						this.setLocalStorage([...this.flowData,this.popItem,this.getNowItem()])
 					}
@@ -137,6 +265,41 @@
 				}
 					console.log(JSON.parse(window.localStorage.getItem('flowData')).pop())
 					this.currentDate = JSON.parse(window.localStorage.getItem('flowData')).pop().date
+
+					// 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+
+				const xAxisData = []
+				const yAxisData = []
+				this.flowData.map(item=>{
+						yAxisData.push(this.getTotalValue(item))
+						xAxisData.push(item.date)
+				})
+        // 指定图表的配置项和数据
+        var option = {
+            xAxis: {
+								type: 'category',
+								data: xAxisData
+						},
+						yAxis: {
+								type: 'value'
+						},
+						series: [{
+								data: yAxisData,
+								type: 'line',
+								smooth: true
+						}],
+						dataZoom:[{
+				　　　　type: 'slider',//图表下方的伸缩条
+				　　　　show : true, //是否显示
+				　　　realtime : true, //拖动时，是否实时更新系列的视图
+				　　　　start : 0, //伸缩条开始位置（1-100），可以随时更改
+				　　　　end : 100, //伸缩条结束位置（1-100），可以随时更改
+				　　　}],
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
 			},
 			//获取新的临在对象
 			getNowItem(){
@@ -144,11 +307,15 @@
 				if(!this.isToday){
 					this.scoreLoss = 0
 					this.targetGet = 0
+					this.targetGet2 = 0
+					this.targetIdList = []
 				}
 				const item = {
 					date:this.dateFormat('YYYY-mm-dd',new Date()),
 					scoreLoss:this.scoreLoss,
-					targetGet:this.targetGet
+					targetGet:this.targetGet,
+					targetGet2:this.targetGet2,
+					targetIdList:this.targetIdList
 				}
 				return item;
 			},
