@@ -97,7 +97,7 @@
 						<span>行为</span>
 						<span>思考</span>
 					</li>
-					<li v-for="(item,index) in flowData.reverse()" :key="index">
+					<li v-for="(item,index) in returnReverse" :key="index">
 					<span>{{item.date}}</span>
 						<span>{{60 - item.scoreLoss + item.targetGet +item.targetGet2}}</span>
 						<span>{{item.scoreLoss}}</span>
@@ -148,6 +148,21 @@
 			}]
 		},
 		mounted(){
+				this.setLocalStorage([{date: "2020-08-01",
+			scoreLoss: 1,
+			targetGet: 1,
+			targetGet2: 1,
+			targetIdList: [5, 8, 3]},{date: "2020-08-02",
+			scoreLoss: 1,
+			targetGet: 1,
+			targetGet2: 1,
+			targetIdList: [5, 8, 3]},{date: "2020-08-04",
+			scoreLoss: 1,
+			targetGet: 1,
+			targetGet2: 1,
+			targetIdList: [5, 8, 3]}])
+
+
 			this.getScore()
 			setInterval(()=>{
 				this.syncStorage()
@@ -158,7 +173,10 @@
 
 		},
 		computed:{
-			
+			returnReverse(){
+					let flowData = [...this.flowData].reverse()
+					return flowData;
+			},
 			flowData(){
 				let _flowData = JSON.parse(window.localStorage.getItem('flowData'))
 				if(_flowData){
