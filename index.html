@@ -249,9 +249,13 @@
 
 				const xAxisData = []
 				const yAxisData = []
+				
+				const weekList = new Array("日", "一", "二", "三", "四", "五", "六");
 				this.flowData.map(item => {
+					const week = new Date(item.date).getDay();  
+					const str = "(周"+ weekList[week] + ')';  
 					yAxisData.push(this.getTotalValue(item))
-					xAxisData.push(item.date)
+					xAxisData.push(item.date + str)
 				})
 				// 指定图表的配置项和数据
 				let option = {
