@@ -3,42 +3,48 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>临在记录</title>
-		 <meta name ="viewport" content ="initial-scale=1, maximum-scale=3, minimum-scale=1, user-scalable=no">
+		<meta name="viewport" content="initial-scale=1, maximum-scale=3, minimum-scale=1, user-scalable=no">
 		<style type="text/css">
-			#body{
+			#body {
 				font-size: 16px;
 				line-height: 40px;
 				width: 200px;
 				margin: 20px auto;
 			}
-			[v-cloak]{
-			    display: none;
+
+			[v-cloak] {
+				display: none;
 			}
-			.button-style{
+
+			.button-style {
 				width: 100px;
 				height: 38px;
-				margin-right:20px;
+				margin-right: 20px;
 			}
-			.targetFulfill{
-				color:#3286ce;
+
+			.targetFulfill {
+				color: #3286ce;
 			}
-			.oldData li{
-				padding:2px 0;
+
+			.oldData li {
+				padding: 2px 0;
 				list-style: none;
 			}
-			.oldData li span{
-					display:inline-block;
-					width:40px;
-					text-align:center;
+
+			.oldData li span {
+				display: inline-block;
+				width: 40px;
+				text-align: center;
 			}
-			.oldData li span:nth-child(1){
-					display:inline-block;
-					width:70px;
+
+			.oldData li span:nth-child(1) {
+				display: inline-block;
+				width: 70px;
 			}
 		</style>
 		<script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.8.0/echarts.min.js"></script>
 		<script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.3.4/vconsole.min.js"></script>
-	</head>		
+	</head>
 	<body>
 		<div id="app" v-cloak>
 			<section id="body">
@@ -51,7 +57,7 @@
 				</section>
 				<!-- 扣分 -->
 				<section id="loss">
-					扣除分数：{{scoreLoss}}
+					临在扣除：{{scoreLoss}}
 				</section>
 				<section>
 					<button @click="countChange(1)" class="button-style">减一</button>
@@ -71,20 +77,13 @@
 					<button @click="countChange2(1)" class="button-style">加一</button>
 					<button @click="countChange2(-1)" style="width: 50px;height: 38px;">减一</button>
 				</section>
-				
-				<!-- <section>
-					<input type="number" name="" id="" v-model="inputLoss"  style="width: 112px;height: 30px;"/>
-					<button @click="lossChange" style="width: 80px;height: 38px;">确定</button>
-				</section> -->
-				<!-- 过去数据 -->
-				
 			</section>
 			<section style="margin:20px 0 10px 10px;">
-				常驻目标：{{targetGet2}}
+				常驻目标：{{targetIdList.length * 2}}
 			</section>
 			<section style="margin-bottom:20px;">
-				<button v-for="(item,index) in targetList" :key="index" @click="targetIdListChange(item.id)" 
-				style="margin:0 10px 5px 0;" :class="[targetIdList.indexOf(item.id)>-1?'targetFulfill':'']">{{item.label}}</button>
+				<button v-for="(item,index) in targetList" :key="index" @click="targetIdListChange(item.id)" style="margin:0 10px 5px 0;"
+				 :class="[targetIdList.indexOf(item.id)>-1?'targetFulfill':'']">{{item.label}}</button>
 			</section>
 
 			<section id="loss" style="font-size: 10px;line-height: 14px;margin-top: 20px;">
@@ -96,13 +95,15 @@
 						<span>临在</span>
 						<span>行为</span>
 						<span>思考</span>
+						<span>常驻</span>
 					</li>
 					<li v-for="(item,index) in returnReverse" :key="index">
-					<span>{{item.date}}</span>
-						<span>{{60 - item.scoreLoss + item.targetGet +item.targetGet2}}</span>
+						<span>{{item.date}}</span>
+						<span>{{getTotalValue(item)}}</span>
 						<span>{{item.scoreLoss}}</span>
 						<span>{{item.targetGet}}</span>
 						<span>{{item.targetGet2}}</span>
+						<span>{{item.targetIdList.length * 2}}</span>
 					</li>
 				</ul>
 			</section>
@@ -118,218 +119,207 @@
 			scoreLoss: 0,
 			targetGet: 0,
 			targetGet2: 0,
-			inputLoss:null,
-			currentDate:'---',
-			targetIdList:[],
-			targetList:[{
-				id:1,
-				label:"早睡"
-			},{
-				id:2,
-				label:"早起"
-			},{
-				id:3,
-				label:"锻炼"
-			},{
-				id:4,
-				label:"练声"
-			},{
-				id:5,
-				label:"学习技术"
-			},{
-				id:6,
-				label:"心理学"
-			},{
-				id:7,
-				label:"听书读书"
-			},{
-				id:8,
-				label:"交际"
+			targetGet3: 0,
+			currentDate: '---',
+			targetIdList: [],
+			targetList: [{
+				id: 1,
+				label: "早睡"
+			}, {
+				id: 2,
+				label: "早起"
+			}, {
+				id: 3,
+				label: "锻炼"
+			}, {
+				id: 4,
+				label: "练声"
+			}, {
+				id: 5,
+				label: "学习技术"
+			}, {
+				id: 6,
+				label: "心理学"
+			}, {
+				id: 7,
+				label: "听书读书"
+			}, {
+				id: 8,
+				label: "交际"
 			}]
 		},
-		mounted(){
+		mounted() {
+			var vConsole = new VConsole(); //手机控制台
+			
 			this.getScore()
-			setInterval(()=>{
+			
+			setInterval(() => {
 				this.syncStorage()
-			},1000)
-
-
-			 var vConsole = new VConsole(); //手机控制台
-
+			}, 1000)
 		},
-		computed:{
-			returnReverse(){
-					let flowData = [...this.flowData].reverse()
-					return flowData;
+		computed: {
+			returnReverse() {
+				let flowData = [...this.flowData].reverse()
+				return flowData;
 			},
-			flowData(){
-				let _flowData = JSON.parse(window.localStorage.getItem('flowData'))
-				if(_flowData){
-					_flowData.pop()
-					return _flowData
-				}
+			flowData() {
+				let _flowData = JSON.parse(window.localStorage.getItem('flowData')) || []
+				_flowData.pop()
+				return _flowData
 			},
-			popItem(){
-				let _flowData = JSON.parse(window.localStorage.getItem('flowData'))
-				if(_flowData){
-					return _flowData.pop()
-				}
+			popItem() {
+				let _flowData = JSON.parse(window.localStorage.getItem('flowData')) || []
+				return _flowData.pop()
 			},
-			isToday(){
-				return this.popItem ? this.popItem.date ==this.dateFormat('YYYY-mm-dd',new Date()) :true
+			isToday() {
+				return this.popItem ? this.popItem.date == this.dateFormat('YYYY-mm-dd', new Date()) : true
 			},
-			getTotal(){
-				return 60 - this.scoreLoss + this.targetGet +this.targetGet2;
+			getTotal() {
+				return 60 - this.scoreLoss + this.targetGet + this.targetGet2 + this.targetIdList.length * 2;
 			}
 		},
 		methods: {
-			getTotalValue(item){
+			getTotalValue(item) {
 				item.scoreLoss = item.scoreLoss || 0
 				item.targetGet = item.targetGet || 0
 				item.targetGet2 = item.targetGet2 || 0
+				item.targetIdList = item.targetIdList || []
 
-				return 60 - item.scoreLoss + item.targetGet +item.targetGet2;
+				return 60 - item.scoreLoss + item.targetGet + item.targetGet2 + this.targetIdList.length * 2;
 			},
 			//点击常跓目标
-			targetIdListChange(id){
+			targetIdListChange(id) {
 				const ind = this.targetIdList.indexOf(id)
-					if(ind >-1){
-						this.targetIdList.splice(ind,1)
-					}else{
-						this.targetIdList.push(id)
-					}
-				this.setLocalStorage([...this.flowData,this.getNowItem()])
+				if (ind > -1) {
+					this.targetIdList.splice(ind, 1)
+					this.targetGet3 -= 2
+				} else {
+					this.targetIdList.push(id)
+					this.targetGet3 += 2
+				}
+				this.setLocalStorage([...this.flowData, this.getNowItem()])
 			},
 			//同步
-			syncStorage(){
-				if(this.isToday){
+			syncStorage() {
+				if (this.isToday) {
 					// this.setLocalStorage([...this.flowData,this.getNowItem()])
-				}else{
-					this.setLocalStorage([...this.flowData,this.popItem,this.getNowItem()])
+				} else {
+					this.setLocalStorage([...this.flowData, this.popItem, this.getNowItem()])
 				}
 			},
 			//思考目标
-			countChange2(count){
+			countChange2(count) {
 				this.targetGet2 += count
-				this.setLocalStorage([...this.flowData,this.getNowItem()])
+				this.setLocalStorage([...this.flowData, this.getNowItem()])
 			},
 			//行为目标
-			countChange1(count){
+			countChange1(count) {
 				this.targetGet += count
-				this.setLocalStorage([...this.flowData,this.getNowItem()])
+				this.setLocalStorage([...this.flowData, this.getNowItem()])
 			},
 			//临在扣除
-			countChange(count){
-				this.inputLoss = count
-				this.lossChange()
-			},
-			//目标事件
-			lossChange2(){
-				this.scoreLoss += Number(this.inputLoss)
-				this.inputLoss = null
-				this.setLocalStorage([...this.flowData,this.getNowItem()])
-			},
-			//扣分事件
-			lossChange(){
-				this.scoreLoss += Number(this.inputLoss)
-				this.inputLoss = null
-				this.setLocalStorage([...this.flowData,this.getNowItem()])
+			countChange(count) {
+				this.scoreLoss += count
+				this.setLocalStorage([...this.flowData, this.getNowItem()])
 			},
 			// 1小时加6分，10分钟无序-1，30分钟无序 - 5；一小时无序 -15
 			getScore() {
-				if(this.flowData){
+				//非首次访问
+				if (this.flowData.length) {
 					//有今天数据
-					if(this.isToday){
+					if (this.isToday) {
 						this.scoreLoss = this.popItem.scoreLoss
 						this.targetGet = this.popItem.targetGet || 0
 						this.targetGet2 = this.popItem.targetGet2 || 0
 						this.targetIdList = this.popItem.targetIdList || []
-					}else{
-						this.setLocalStorage([...this.flowData,this.popItem,this.getNowItem()])
+					} else {
+						this.setLocalStorage([...this.flowData, this.popItem, this.getNowItem()])
 					}
-				}else{
-					//第一次访问初始化
+				} else {
+					//首次访问初始化
 					this.setLocalStorage([this.getNowItem()])
 				}
-					console.log(JSON.parse(window.localStorage.getItem('flowData')).pop())
-					this.currentDate = JSON.parse(window.localStorage.getItem('flowData')).pop().date
+				this.currentDate = JSON.parse(window.localStorage.getItem('flowData')).pop().date
+				this.initChart();
 
-					// 基于准备好的dom，初始化echarts实例
-        var myChart = echarts.init(document.getElementById('main'));
+			},
+			initChart() {
+				// 基于准备好的dom，初始化echarts实例
+				let myChart = echarts.init(document.getElementById('main'));
 
 				const xAxisData = []
 				const yAxisData = []
-				this.flowData.map(item=>{
-						yAxisData.push(this.getTotalValue(item))
-						xAxisData.push(item.date)
+				this.flowData.map(item => {
+					yAxisData.push(this.getTotalValue(item))
+					xAxisData.push(item.date)
 				})
-        // 指定图表的配置项和数据
-        var option = {
-            xAxis: {
-								type: 'category',
-								data: xAxisData
-						},
-						yAxis: {
-								type: 'value'
-						},
-						series: [{
-								data: yAxisData,
-								type: 'line',
-								smooth: true
-						}],
-						dataZoom:[{
-				　　　　type: 'slider',//图表下方的伸缩条
-				　　　　show : true, //是否显示
-				　　　realtime : true, //拖动时，是否实时更新系列的视图
-				　　　　start : 0, //伸缩条开始位置（1-100），可以随时更改
-				　　　　end : 100, //伸缩条结束位置（1-100），可以随时更改
-				　　　}],
-        };
+				// 指定图表的配置项和数据
+				let option = {
+					xAxis: {
+						type: 'category',
+						data: xAxisData
+					},
+					yAxis: {
+						type: 'value'
+					},
+					series: [{
+						data: yAxisData,
+						type: 'line',
+						smooth: true
+					}],
+					dataZoom: [{
+						type: 'slider', //图表下方的伸缩条
+						show: true, //是否显示
+						realtime: true, //拖动时，是否实时更新系列的视图
+						start: 0, //伸缩条开始位置（1-100），可以随时更改
+						end: 100, //伸缩条结束位置（1-100），可以随时更改
+					}],
+				};
 
-        // 使用刚指定的配置项和数据显示图表。
-        myChart.setOption(option);
+				// 使用刚指定的配置项和数据显示图表。
+				myChart.setOption(option);
 			},
 			//获取新的临在对象
-			getNowItem(){
+			getNowItem() {
 				//7点第一次执行，重置扣分
-				if(!this.isToday){
+				if (!this.isToday) {
 					this.scoreLoss = 0
 					this.targetGet = 0
 					this.targetGet2 = 0
 					this.targetIdList = []
 				}
 				const item = {
-					date:this.dateFormat('YYYY-mm-dd',new Date()),
-					scoreLoss:this.scoreLoss,
-					targetGet:this.targetGet,
-					targetGet2:this.targetGet2,
-					targetIdList:this.targetIdList
+					date: this.dateFormat('YYYY-mm-dd', new Date()),
+					scoreLoss: this.scoreLoss,
+					targetGet: this.targetGet,
+					targetGet2: this.targetGet2,
+					targetIdList: this.targetIdList
 				}
 				return item;
 			},
 			//设置localStorage
-			setLocalStorage(data){
-				localStorage.setItem('flowData',JSON.stringify(data))
+			setLocalStorage(data) {
+				localStorage.setItem('flowData', JSON.stringify(data))
 			},
 			//YYYY-mm-dd HH:MM表示2019-06-06 19:45
 			dateFormat(fmt, date) {
-			    let ret;
-			    const opt = {
-			        "Y+": date.getFullYear().toString(),        // 年
-			        "m+": (date.getMonth() + 1).toString(),     // 月
-			        "d+": date.getDate().toString(),            // 日
-			        "H+": date.getHours().toString(),           // 时
-			        "M+": date.getMinutes().toString(),         // 分
-			        "S+": date.getSeconds().toString()          // 秒
-			        // 有其他格式化字符需求可以继续添加，必须转化成字符串
-			    };
-			    for (let k in opt) {
-			        ret = new RegExp("(" + k + ")").exec(fmt);
-			        if (ret) {
-			            fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
-			        };
-			    };
-			    return fmt;
+				let ret;
+				const opt = {
+					"Y+": date.getFullYear().toString(), // 年
+					"m+": (date.getMonth() + 1).toString(), // 月
+					"d+": date.getDate().toString(), // 日
+					"H+": date.getHours().toString(), // 时
+					"M+": date.getMinutes().toString(), // 分
+					"S+": date.getSeconds().toString() // 秒
+					// 有其他格式化字符需求可以继续添加，必须转化成字符串
+				};
+				for (let k in opt) {
+					ret = new RegExp("(" + k + ")").exec(fmt);
+					if (ret) {
+						fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+					};
+				};
+				return fmt;
 			}
 
 		}
