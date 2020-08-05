@@ -81,7 +81,7 @@
 					常驻目标：{{targetIdList.length * 2}}
 				</section>
 			</section>
-			<section style="margin:0 30px 30px;">
+			<section style="margin:0 0 30px 30px;">
 				<button v-for="(item,index) in targetList" :key="index" @click="targetIdListChange(item.id)" style="margin:0 10px 5px 0;"
 				 :class="[targetIdList.indexOf(item.id)>-1?'targetFulfill':'']">{{item.label}}</button>
 			</section>
