@@ -81,7 +81,7 @@
 			<section style="margin:20px 0 10px 10px;">
 				常驻目标：{{targetIdList.length * 2}}
 			</section>
-			<section style="margin-bottom:20px;">
+			<section style="margin:0 10px 20px;">
 				<button v-for="(item,index) in targetList" :key="index" @click="targetIdListChange(item.id)" style="margin:0 10px 5px 0;"
 				 :class="[targetIdList.indexOf(item.id)>-1?'targetFulfill':'']">{{item.label}}</button>
 			</section>
@@ -185,7 +185,7 @@
 				item.targetGet2 = item.targetGet2 || 0
 				item.targetIdList = item.targetIdList || []
 
-				return 60 - item.scoreLoss + item.targetGet + item.targetGet2 + this.targetIdList.length * 2;
+				return 60 - item.scoreLoss + item.targetGet + item.targetGet2 + item.targetIdList.length * 2;
 			},
 			//点击常跓目标
 			targetIdListChange(id) {
