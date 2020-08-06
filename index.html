@@ -4,6 +4,9 @@
 		<meta charset="utf-8" />
 		<title>临在记录</title>
 		<meta name="viewport" content="initial-scale=1, maximum-scale=3, minimum-scale=1, user-scalable=no">
+		<script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.8.0/echarts.min.js"></script>
+		<script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.3.4/vconsole.min.js"></script>
+		<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.js"></script>
 		<style type="text/css">
 			#body {
 				font-size: 16px;
@@ -42,8 +45,6 @@
 				width: 70px;
 			}
 		</style>
-		<script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.8.0/echarts.min.js"></script>
-		<script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.3.4/vconsole.min.js"></script>
 	</head>
 	<body>
 		<div id="app" v-cloak>
@@ -78,12 +79,12 @@
 					<button @click="countChange('targetThink',-1)" style="width: 50px;height: 38px;">减一</button>
 				</section>
 				<section>
-					常驻目标：{{importantIdList.length * 2}}
+					常驻目标：{{importantSelectList.length * 2}}
 				</section>
 			</section>
 			<section style="margin:0 0 30px 30px;">
-				<button v-for="(item,index) in importantList" :key="index" @click="importantIdListChange(item.id)" style="margin:0 10px 5px 0;"
-				 :class="[importantIdList.indexOf(item.id)>-1?'targetFulfill':'']">{{item.label}}</button>
+				<button v-for="(item,index) in importantList" :key="index" @click="importantSelectListChange(item)" style="margin:0 10px 5px 0;"
+				 :class="[importantSelectList.indexOf(item)>-1?'targetFulfill':'']">{{item}}</button>
 			</section>
 
 			<section id="loss" style="font-size: 10px;line-height: 14px;margin-top: 20px;">
@@ -99,11 +100,11 @@
 					</li>
 					<li v-for="(item,index) in flowDataReverse" :key="index">
 						<span>{{item.date}}</span>
-						<span>{{getTotalValue(item)}}</span>
+						<span>{{getTotalScore(item)}}</span>
 						<span>{{item.scoreLoss}}</span>
 						<span>{{item.targetAction}}</span>
 						<span>{{item.targetThink}}</span>
-						<span>{{item.importantIdList.length * 2}}</span>
+						<span>{{item.importantSelectList.length * 2}}</span>
 					</li>
 				</ul>
 			</section>
@@ -111,7 +112,6 @@
 		</div>
 	</body>
 </html>
-<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.js"></script>
 <script type="text/javascript">
 	new Vue({
 		el: '#app',
@@ -121,38 +121,14 @@
 			targetAction: 0,
 			targetThink: 0,
 			targetImportant: 0,
-			importantIdList: [],
-			importantList: [{
-				id: 1,
-				label: "早睡"
-			}, {
-				id: 2,
-				label: "早起"
-			}, {
-				id: 3,
-				label: "锻炼"
-			}, {
-				id: 4,
-				label: "练声"
-			}, {
-				id: 5,
-				label: "学习技术"
-			}, {
-				id: 6,
-				label: "心理学"
-			}, {
-				id: 7,
-				label: "听书读书"
-			}, {
-				id: 8,
-				label: "交际"
-			}]
+			importantSelectList: [],
+			importantList: ["早睡", "早起", "锻炼", "练声", "学习技术", "心理学", "听书读书", "交际"]
 		},
 		mounted() {
 			var vConsole = new VConsole(); //手机控制台
-			
-			this.getScore()
-			
+
+			this.getScore();
+			this.initChart();
 			setInterval(() => {
 				this.syncStorage()
 			}, 1000)
@@ -176,27 +152,27 @@
 			},
 			//今天总分
 			getTotal() {
-				return 60 - this.scoreLoss + this.targetAction + this.targetThink + this.importantIdList.length * 2;
+				return 60 - this.scoreLoss + this.targetAction + this.targetThink + this.importantSelectList.length * 2;
 			}
 		},
 		methods: {
 			//计算总分
-			getTotalValue(item) {
+			getTotalScore(item) {
 				item.scoreLoss = item.scoreLoss || 0
 				item.targetAction = item.targetAction || 0
 				item.targetThink = item.targetThink || 0
-				item.importantIdList = item.importantIdList || []
+				item.importantSelectList = item.importantSelectList || []
 
-				return 60 - item.scoreLoss + item.targetAction + item.targetThink + item.importantIdList.length * 2;
+				return 60 - item.scoreLoss + item.targetAction + item.targetThink + item.importantSelectList.length * 2;
 			},
 			//点击常跓目标
-			importantIdListChange(id) {
-				const ind = this.importantIdList.indexOf(id)
+			importantSelectListChange(item) {
+				const ind = this.importantSelectList.indexOf(item)
 				if (ind > -1) {
-					this.importantIdList.splice(ind, 1)
+					this.importantSelectList.splice(ind, 1)
 					this.targetImportant -= 2
 				} else {
-					this.importantIdList.push(id)
+					this.importantSelectList.push(item)
 					this.targetImportant += 2
 				}
 				this.setLocalStorage([...this.flowData, this.getNowItem()])
@@ -208,7 +184,7 @@
 				}
 			},
 			//分数加减
-			countChange(type,count) {
+			countChange(type, count) {
 				this[type] += count
 				this.setLocalStorage([...this.flowData, this.getNowItem()])
 			},
@@ -220,7 +196,7 @@
 						this.scoreLoss = this.popItem.scoreLoss
 						this.targetAction = this.popItem.targetAction || 0
 						this.targetThink = this.popItem.targetThink || 0
-						this.importantIdList = this.popItem.importantIdList || []
+						this.importantSelectList = this.popItem.importantSelectList || []
 					} else {
 						this.setLocalStorage([...this.flowData, this.popItem, this.getNowItem()])
 					}
@@ -229,7 +205,6 @@
 					this.setLocalStorage([this.getNowItem()])
 				}
 				this.currentDate = JSON.parse(window.localStorage.getItem('flowData')).pop().date
-				this.initChart();
 
 			},
 			initChart() {
@@ -238,13 +213,13 @@
 
 				const xAxisData = []
 				const yAxisData = []
-				
+
 				const weekList = new Array("日", "一", "二", "三", "四", "五", "六");
 				this.flowData.forEach(item => {
-					const week = new Date(item.date).getDay();  
-					const str = "(周"+ weekList[week] + ')';  
+					const week = new Date(item.date).getDay();
+					const str = "(周" + weekList[week] + ')';
 					xAxisData.push(item.date + str)
-					yAxisData.push(this.getTotalValue(item))
+					yAxisData.push(this.getTotalScore(item))
 				})
 				// 指定图表的配置项和数据
 				let option = {
@@ -279,14 +254,14 @@
 					this.scoreLoss = 0
 					this.targetAction = 0
 					this.targetThink = 0
-					this.importantIdList = []
+					this.importantSelectList = []
 				}
 				const item = {
 					date: this.dateFormat('YYYY-mm-dd', new Date()),
 					scoreLoss: this.scoreLoss,
 					targetAction: this.targetAction,
 					targetThink: this.targetThink,
-					importantIdList: this.importantIdList
+					importantSelectList: this.importantSelectList
 				}
 				return item;
 			},
