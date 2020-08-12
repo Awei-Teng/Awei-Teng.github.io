@@ -206,7 +206,7 @@
 					//有今天数据
 					if (this.isToday) {
 						this.scoreLoss = this.popItem.scoreLoss
-						this.confidenceLoss = this.popItem.confidenceLoss
+						this.confidenceLoss = this.popItem.confidenceLoss || 0
 						this.targetAction = this.popItem.targetAction || 0
 						this.targetThink = this.popItem.targetThink || 0
 						this.importantSelectList = this.popItem.importantSelectList || []
