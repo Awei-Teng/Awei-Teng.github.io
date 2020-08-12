@@ -68,7 +68,7 @@
 					自信扣除：{{confidenceLoss}}
 				</section>
 				<section>
-					<button @click="countChange('confidenceLoss',1)" class="button-style">减一</button>
+					<button @click="countChange('confidenceLoss',5)" class="button-style">减五</button>
 					<button @click="countChange('confidenceLoss',-1)" style="width: 50px;height: 38px;">加一</button>
 				</section>
 				
@@ -94,8 +94,8 @@
 				<button v-for="(item,index) in importantList" :key="index" @click="importantSelectListChange(item)" style="margin:0 10px 5px 0;"
 				 :class="[importantSelectList.indexOf(item)>-1?'targetFulfill':'']">{{item}}</button>
 			</section>
-
-			<section id="loss" style="font-size: 10px;line-height: 14px;margin-top: 20px;">
+			<div id="main" style="width: 100%;height:400px;"></div>
+			<section id="loss" style="font-size: 10px;line-height: 14px;margin: 50px 0 100px;">
 				过去数据：
 				<ul class="oldData" style="padding: 0;">
 					<li>
@@ -118,7 +118,6 @@
 					</li>
 				</ul>
 			</section>
-			<div id="main" style="width: 100%;height:400px;margin-bottom: 100px;"></div>
 		</div>
 	</body>
 </html>
