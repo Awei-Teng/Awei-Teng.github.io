@@ -57,34 +57,34 @@
 				</section>
 				
 				<section id="loss">
-					临在扣除：{{scoreLoss}}
+					临在扣分：{{scoreLoss}}
 				</section>
 				<section>
-					<button @click="countChange('scoreLoss',1)" class="button-style">减一</button>
-					<button @click="countChange('scoreLoss',-1)" style="width: 50px;height: 38px;">加一</button>
+					<button @click="countChange('scoreLoss',1)" class="button-style">扣</button>
+					<button @click="countChange('scoreLoss',-1)" style="width: 50px;height: 38px;">加</button>
 				</section>
 				
 				<section id="loss">
-					自信扣除：{{confidenceLoss}}
+					自信扣分：{{confidenceLoss*5}}
 				</section>
 				<section>
-					<button @click="countChange('confidenceLoss',5)" class="button-style">减五</button>
-					<button @click="countChange('confidenceLoss',-1)" style="width: 50px;height: 38px;">加一</button>
+					<button @click="countChange('confidenceLoss',1)" class="button-style">扣</button>
+					<button @click="countChange('confidenceLoss',-1)" style="width: 50px;height: 38px;">加</button>
 				</section>
 				
 				<section>
 					行为目标：{{targetAction}}
 				</section>
 				<section>
-					<button @click="countChange('targetAction',1)" class="button-style">加一</button>
-					<button @click="countChange('targetAction',-1)" style="width: 50px;height: 38px;">减一</button>
+					<button @click="countChange('targetAction',1)" class="button-style">加</button>
+					<button @click="countChange('targetAction',-1)" style="width: 50px;height: 38px;">减</button>
 				</section>
 				<section>
 					思考目标：{{targetThink}}
 				</section>
 				<section>
-					<button @click="countChange('targetThink',1)" class="button-style">加一</button>
-					<button @click="countChange('targetThink',-1)" style="width: 50px;height: 38px;">减一</button>
+					<button @click="countChange('targetThink',1)" class="button-style">加</button>
+					<button @click="countChange('targetThink',-1)" style="width: 50px;height: 38px;">减</button>
 				</section>
 				<section>
 					常驻目标：{{importantSelectList.length * 2}}
@@ -111,7 +111,7 @@
 						<span>{{item.date}}</span>
 						<span>{{getTotalScore(item)}}</span>
 						<span>{{item.scoreLoss}}</span>
-						<span>{{item.confidenceLoss}}</span>
+						<span>{{item.confidenceLoss * 5}}</span>
 						<span>{{item.targetAction}}</span>
 						<span>{{item.targetThink}}</span>
 						<span>{{item.importantSelectList.length * 2}}</span>
@@ -162,7 +162,7 @@
 			},
 			//今天总分
 			getTotal() {
-				return 60 - this.scoreLoss - this.confidenceLoss + this.targetAction + this.targetThink + this.importantSelectList.length * 2;
+				return 60 - this.scoreLoss - this.confidenceLoss*5 + this.targetAction + this.targetThink + this.importantSelectList.length * 2;
 			}
 		},
 		methods: {
@@ -174,7 +174,7 @@
 				item.targetThink = item.targetThink || 0
 				item.importantSelectList = item.importantSelectList || []
 
-				return 60 - item.scoreLoss - item.confidenceLoss + item.targetAction + item.targetThink + item.importantSelectList.length * 2;
+				return 60 - item.scoreLoss - item.confidenceLoss*5 + item.targetAction + item.targetThink + item.importantSelectList.length * 2;
 			},
 			//点击常跓目标
 			importantSelectListChange(item) {
@@ -225,38 +225,104 @@
 
 				let xAxisData = []
 				let yAxisData = []
-
+				let scoreLoss = []
+				let confidenceLoss = []
+				let targetAction = []
+				let targetThink = []
+				let importantSelectList = []
 				const weekList = new Array("日", "一", "二", "三", "四", "五", "六");
 				this.flowData.forEach(item => {
 					const week = new Date(item.date).getDay();
 					const str = "(周" + weekList[week] + ')';
 					xAxisData.push(item.date + str)
 					yAxisData.push(this.getTotalScore(item))
+					
+					scoreLoss.push(item.scoreLoss)
+					confidenceLoss.push(item.confidenceLoss * 5)
+					targetAction.push(item.targetAction)
+					targetThink.push(item.targetThink)
+					importantSelectList.push(item.importantSelectList.length)
 				})
-				// 指定图表的配置项和数据
+				
 				let option = {
-					xAxis: {
-						type: 'category',
-						data: xAxisData
+				    title: {
+				        text: ' '
+				    },
+				    tooltip: {
+				        trigger: 'axis'
+				    },
+				    legend: {
+				        data: ['总分','临在', '自信', '行为目标', '思考目标', '常跓目标']
+				    },
+				    grid: {
+				        left: '3%',
+				        right: '4%',
+				        bottom: '3%',
+				        containLabel: true
+				    }, 
+				    xAxis: {
+				        type: 'category',
+				        boundaryGap: false,
+				        data: xAxisData
+				    },
+				    yAxis: {
+				        type: 'value',
+						// max: function(value) {
+						//     return value.max + 5;
+						// }
 					},
-					yAxis: {
-						type: 'value'
-					},
-					series: [{
-						data: yAxisData,
-						type: 'line',
-						smooth: true
-					}],
-					dataZoom: [{
-						type: 'slider', //图表下方的伸缩条
-						show: true, //是否显示
-						realtime: true, //拖动时，是否实时更新系列的视图
-						start: 0, //伸缩条开始位置（1-100），可以随时更改
-						end: 100, //伸缩条结束位置（1-100），可以随时更改
-					}],
+					    dataZoom: [
+					        {
+					            show: true,
+					            realtime: true,
+					            start: 30,
+					            end: 100
+					        },
+					        {
+					            type: 'inside',
+					            realtime: true,
+					            start: 30,
+					            end: 100
+					        }
+					    ],
+				    series: [
+						{
+						    name: '总分',
+						    type: 'line',
+							smooth: true,
+						    data: yAxisData
+						},
+				        {
+				            name: '临在扣分',
+				            type: 'line',
+							smooth: true,
+				            data: scoreLoss
+				        },
+				        {
+				            name: '自信扣分',
+				            type: 'line',
+							smooth: true,
+				            data: confidenceLoss
+				        },
+				        {
+				            name: '行为目标',
+				            type: 'line',
+							smooth: true,
+				            data: targetAction
+				        },
+				        {
+				            name: '思考目标',
+				            type: 'line',
+				            data: targetThink
+				        },
+				        {
+				            name: '常跓目标',
+				            type: 'line',
+							smooth: true,
+				            data: importantSelectList
+				        }
+				    ]
 				};
-
-				// 使用刚指定的配置项和数据显示图表。
 				myChart.setOption(option);
 			},
 			//获取新的临在对象
