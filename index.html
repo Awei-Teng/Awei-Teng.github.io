@@ -4,9 +4,9 @@
 		<meta charset="utf-8" />
 		<title>临在记录</title>
 		<meta name="viewport" content="initial-scale=1, maximum-scale=3, minimum-scale=1, user-scalable=no">
+		<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.js"></script>
 		<script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.8.0/echarts.min.js"></script>
 		<script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.3.4/vconsole.min.js"></script>
-		<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.11/vue.js"></script>
 		<style type="text/css">
 			#body {
 				font-size: 16px;
@@ -52,11 +52,10 @@
 				<section style="font-size: 18px;">
 					临在状态：{{currentDate}}
 				</section>
-				<!-- 得分 -->
 				<section id="total">
 					总分：<span style="color: red;">{{getTotal}}</span>
 				</section>
-				<!-- 扣分 -->
+				
 				<section id="loss">
 					临在扣除：{{scoreLoss}}
 				</section>
@@ -64,6 +63,15 @@
 					<button @click="countChange('scoreLoss',1)" class="button-style">减一</button>
 					<button @click="countChange('scoreLoss',-1)" style="width: 50px;height: 38px;">加一</button>
 				</section>
+				
+				<section id="loss">
+					自信扣除：{{confidenceLoss}}
+				</section>
+				<section>
+					<button @click="countChange('confidenceLoss',1)" class="button-style">减一</button>
+					<button @click="countChange('confidenceLoss',-1)" style="width: 50px;height: 38px;">加一</button>
+				</section>
+				
 				<section>
 					行为目标：{{targetAction}}
 				</section>
@@ -89,11 +97,12 @@
 
 			<section id="loss" style="font-size: 10px;line-height: 14px;margin-top: 20px;">
 				过去数据：
-				<ul class="oldData">
+				<ul class="oldData" style="padding: 0;">
 					<li>
 						<span>日期</span>
 						<span>总分</span>
 						<span>临在</span>
+						<span>自信</span>
 						<span>行为</span>
 						<span>思考</span>
 						<span>常驻</span>
@@ -102,6 +111,7 @@
 						<span>{{item.date}}</span>
 						<span>{{getTotalScore(item)}}</span>
 						<span>{{item.scoreLoss}}</span>
+						<span>{{item.confidenceLoss}}</span>
 						<span>{{item.targetAction}}</span>
 						<span>{{item.targetThink}}</span>
 						<span>{{item.importantSelectList.length * 2}}</span>
@@ -117,12 +127,13 @@
 		el: '#app',
 		data: {
 			scoreLoss: 0,
+			confidenceLoss: 0,
 			currentDate: '---',
 			targetAction: 0,
 			targetThink: 0,
 			targetImportant: 0,
 			importantSelectList: [],
-			importantList: ["早睡", "早起", "锻炼", "练声", "学习技术", "心理学", "听书读书", "交际"]
+			importantList: ["下班目标","早睡", "早起", "锻炼", "练声", "学习技术", "心理学", "听书读书", "交际"]
 		},
 		mounted() {
 			var vConsole = new VConsole(); //手机控制台
@@ -152,18 +163,19 @@
 			},
 			//今天总分
 			getTotal() {
-				return 60 - this.scoreLoss + this.targetAction + this.targetThink + this.importantSelectList.length * 2;
+				return 60 - this.scoreLoss - this.confidenceLoss + this.targetAction + this.targetThink + this.importantSelectList.length * 2;
 			}
 		},
 		methods: {
 			//计算总分
 			getTotalScore(item) {
 				item.scoreLoss = item.scoreLoss || 0
+				item.confidenceLoss = item.confidenceLoss || 0
 				item.targetAction = item.targetAction || 0
 				item.targetThink = item.targetThink || 0
 				item.importantSelectList = item.importantSelectList || []
 
-				return 60 - item.scoreLoss + item.targetAction + item.targetThink + item.importantSelectList.length * 2;
+				return 60 - item.scoreLoss - item.confidenceLoss + item.targetAction + item.targetThink + item.importantSelectList.length * 2;
 			},
 			//点击常跓目标
 			importantSelectListChange(item) {
@@ -194,6 +206,7 @@
 					//有今天数据
 					if (this.isToday) {
 						this.scoreLoss = this.popItem.scoreLoss
+						this.confidenceLoss = this.popItem.confidenceLoss
 						this.targetAction = this.popItem.targetAction || 0
 						this.targetThink = this.popItem.targetThink || 0
 						this.importantSelectList = this.popItem.importantSelectList || []
@@ -252,6 +265,7 @@
 				//7点第一次执行，重置扣分
 				if (!this.isToday) {
 					this.scoreLoss = 0
+					this.confidenceLoss = 0
 					this.targetAction = 0
 					this.targetThink = 0
 					this.importantSelectList = []
@@ -259,6 +273,7 @@
 				const item = {
 					date: this.dateFormat('YYYY-mm-dd', new Date()),
 					scoreLoss: this.scoreLoss,
+					confidenceLoss: this.confidenceLoss,
 					targetAction: this.targetAction,
 					targetThink: this.targetThink,
 					importantSelectList: this.importantSelectList
