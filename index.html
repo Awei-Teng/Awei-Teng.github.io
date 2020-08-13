@@ -55,7 +55,7 @@
 				<section id="total">
 					总分：<span style="color: red;">{{getTotal}}</span>
 				</section>
-				
+
 				<section id="loss">
 					临在扣分：{{scoreLoss}}
 				</section>
@@ -63,7 +63,7 @@
 					<button @click="countChange('scoreLoss',1)" class="button-style">扣</button>
 					<button @click="countChange('scoreLoss',-1)" style="width: 50px;height: 38px;">加</button>
 				</section>
-				
+
 				<section id="loss">
 					自信扣分：{{confidenceLoss*5}}
 				</section>
@@ -71,7 +71,7 @@
 					<button @click="countChange('confidenceLoss',1)" class="button-style">扣</button>
 					<button @click="countChange('confidenceLoss',-1)" style="width: 50px;height: 38px;">加</button>
 				</section>
-				
+
 				<section>
 					行为目标：{{targetAction}}
 				</section>
@@ -132,7 +132,7 @@
 			targetThink: 0,
 			targetImportant: 0,
 			importantSelectList: [],
-			importantList: ["下班目标","早睡", "早起", "锻炼", "练声", "学习技术", "心理学", "听书读书", "交际"]
+			importantList: ["反馈高地","下班目标", "早睡", "早起", "锻炼", "练声", "学习技术", "心理学", "听书读书", "交际"]
 		},
 		mounted() {
 			var vConsole = new VConsole(); //手机控制台
@@ -162,7 +162,8 @@
 			},
 			//今天总分
 			getTotal() {
-				return 60 - this.scoreLoss - this.confidenceLoss*5 + this.targetAction + this.targetThink + this.importantSelectList.length * 2;
+				return 60 - this.scoreLoss - this.confidenceLoss * 5 + this.targetAction + this.targetThink + this.importantSelectList
+					.length * 2;
 			}
 		},
 		methods: {
@@ -174,7 +175,8 @@
 				item.targetThink = item.targetThink || 0
 				item.importantSelectList = item.importantSelectList || []
 
-				return 60 - item.scoreLoss - item.confidenceLoss*5 + item.targetAction + item.targetThink + item.importantSelectList.length * 2;
+				return 60 - item.scoreLoss - item.confidenceLoss * 5 + item.targetAction + item.targetThink + item.importantSelectList
+					.length * 2;
 			},
 			//点击常跓目标
 			importantSelectListChange(item) {
@@ -236,92 +238,90 @@
 					const str = "(周" + weekList[week] + ')';
 					xAxisData.push(item.date + str)
 					yAxisData.push(this.getTotalScore(item))
-					
+
 					scoreLoss.push(item.scoreLoss)
 					confidenceLoss.push(item.confidenceLoss * 5)
 					targetAction.push(item.targetAction)
 					targetThink.push(item.targetThink)
 					importantSelectList.push(item.importantSelectList.length)
 				})
-				
+
 				let option = {
-				    title: {
-				        text: ' '
-				    },
-				    tooltip: {
-				        trigger: 'axis'
-				    },
-				    legend: {
-				        data: ['总分','临在', '自信', '行为目标', '思考目标', '常跓目标']
-				    },
-				    grid: {
-				        left: '3%',
-				        right: '4%',
-				        bottom: '3%',
-				        containLabel: true
-				    }, 
-				    xAxis: {
-				        type: 'category',
-				        boundaryGap: false,
-				        data: xAxisData
-				    },
-				    yAxis: {
-				        type: 'value',
+					title: {
+						text: ' '
+					},
+					tooltip: {
+						trigger: 'axis'
+					},
+					legend: {
+						data: ['总分', '临在', '自信', '行为目标', '思考目标', '常跓目标']
+					},
+					grid: {
+						left: '3%',
+						right: '4%',
+						bottom: '3%',
+						containLabel: true
+					},
+					xAxis: {
+						type: 'category',
+						boundaryGap: false,
+						data: xAxisData
+					},
+					yAxis: {
+						type: 'value',
 						// max: function(value) {
 						//     return value.max + 5;
 						// }
 					},
-					    dataZoom: [
-					        {
-					            show: true,
-					            realtime: true,
-					            start: 30,
-					            end: 100
-					        },
-					        {
-					            type: 'inside',
-					            realtime: true,
-					            start: 30,
-					            end: 100
-					        }
-					    ],
-				    series: [
-						{
-						    name: '总分',
-						    type: 'line',
-							smooth: true,
-						    data: yAxisData
+					dataZoom: [{
+							show: true,
+							realtime: true,
+							start: 30,
+							end: 100
 						},
-				        {
-				            name: '临在扣分',
-				            type: 'line',
+						{
+							type: 'inside',
+							realtime: true,
+							start: 30,
+							end: 100
+						}
+					],
+					series: [{
+							name: '总分',
+							type: 'line',
 							smooth: true,
-				            data: scoreLoss
-				        },
-				        {
-				            name: '自信扣分',
-				            type: 'line',
+							data: yAxisData
+						},
+						{
+							name: '临在扣分',
+							type: 'line',
 							smooth: true,
-				            data: confidenceLoss
-				        },
-				        {
-				            name: '行为目标',
-				            type: 'line',
+							data: scoreLoss
+						},
+						{
+							name: '自信扣分',
+							type: 'line',
 							smooth: true,
-				            data: targetAction
-				        },
-				        {
-				            name: '思考目标',
-				            type: 'line',
-				            data: targetThink
-				        },
-				        {
-				            name: '常跓目标',
-				            type: 'line',
+							data: confidenceLoss
+						},
+						{
+							name: '行为目标',
+							type: 'line',
 							smooth: true,
-				            data: importantSelectList
-				        }
-				    ]
+							data: targetAction
+						},
+						{
+							name: '思考目标',
+							type: 'line',
+							data: targetThink
+						},
+						{
+							name: '常跓目标',
+							type: 'line',
+							smooth: true,
+							data: importantSelectList
+						}
+					]
 				};
 				myChart.setOption(option);
 			},
